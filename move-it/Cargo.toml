@@ -11,3 +11,6 @@ categories = ["filesystem"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+
+[badges]
+github = { repository = "BigPapa314/move-it-ws", workflow="CI" }

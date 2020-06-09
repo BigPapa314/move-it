@@ -12,3 +12,6 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 move-it = { path ="../move-it", version = "0.1" }
+
+[badges]
+github = { repository = "BigPapa314/move-it-ws", workflow="CI" }
