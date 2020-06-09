@@ -1,4 +1,3 @@
-[![Crates.io](https://img.shields.io/crates/v/move-it.svg)](https://crates.io/crates/move-it)
 [![Workflow Status](https://github.com/BigPapa314/move-it-ws/workflows/CI/badge.svg)](https://github.com/BigPapa314/move-it-ws/actions?query=workflow%3A%22CI%22)
 
 # move-it-ws
@@ -7,8 +6,8 @@ A workspace for learning rust.
 
 ## Contents
 
-* [move-it-cli](./move-it-cli/README.md) 
-* [move-it](./move-it/README.md)
+* [move-it-cli](./move-it-cli/README.md) [![Crates.io](https://img.shields.io/crates/v/move-it-cli.svg)](https://crates.io/crates/move-it-cli)
+* [move-it](./move-it/README.md) [![Crates.io](https://img.shields.io/crates/v/move-it.svg)](https://crates.io/crates/move-it)
 
 ## License
 

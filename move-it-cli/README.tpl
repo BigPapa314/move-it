@@ -1,4 +1,4 @@
-[![Crates.io](https://img.shields.io/crates/v/move-it.svg)](https://crates.io/crates/move-it)
+[![Crates.io](https://img.shields.io/crates/v/move-it-cli.svg)](https://crates.io/crates/move-it-cli)
 {{badges}}
 
 # {{crate}}
