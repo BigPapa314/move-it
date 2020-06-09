@@ -1,0 +1,8 @@
+[tasks.readme]
+descriptio = "Generated the README.md"
+category = "Build"
+command = "cargo"
+args = ["readme", "--output", "README.md"]
+
+[tasks.test]
+dependencies = ["readme"]
