@@ -13,4 +13,4 @@ license = "MIT OR Apache-2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-move-it = { path ="../move-it" }
+move-it = { path ="../move-it", version = "0.1" }
