@@ -7,7 +7,7 @@ description = "A library that moves files."
 repository = "https://github.com/BigPapa314/move-it-ws/tree/master/move-it"
 readme = "README.md"
 keywords = ["files", "move", "copy"]
-categories = ["Filesystem"]
+categories = ["filesystem"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
