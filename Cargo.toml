@@ -1,2 +1,2 @@
 [workspace]
-members = ["move-it"]
+members = ["move-it", "move-it-cli"]
