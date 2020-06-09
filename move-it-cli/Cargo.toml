@@ -3,6 +3,12 @@ name = "move-it-cli"
 version = "0.1.0"
 authors = ["Thomas Kilian <Thomas-Kilian@gmx.net>"]
 edition = "2018"
+description = "An command line executable that moves files."
+repository = "https://github.com/BigPapa314/move-it-ws/tree/master/move-it"
+readme = "README.md"
+keywords = ["cli", "files", "move", "copy"]
+categories = ["Command line utilities", "Filesystem"]
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

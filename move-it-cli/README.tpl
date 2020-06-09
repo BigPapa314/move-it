@@ -1,6 +1,6 @@
-# move-it
+# {{crate}}
 
-It moves files from one folder to an other.
+{{readme}}
 
 ## License
 
