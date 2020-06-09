@@ -1,3 +1,4 @@
+[![Crates.io](https://img.shields.io/crates/v/move-it.svg)](https://crates.io/crates/move-it)
 [![Workflow Status](https://github.com/BigPapa314/move-it-ws/workflows/CI/badge.svg)](https://github.com/BigPapa314/move-it-ws/actions?query=workflow%3A%22CI%22)
 
 # move-it-ws
