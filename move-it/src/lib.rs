@@ -3,9 +3,13 @@
 //! Example
 //!
 //! ```
-//! let src = vec![SourceDescription::new("/tmp/in", "foo.txt")];
-//! let engine = Engine::new(Box::new(src.iter()), OsString::from("/tmp/out"), OsString::from("{file_name}"));
-//! asdf
+//! pub use move_it::Engine;
+//! let src: Vec<String> = vec![
+//!    String::from("/tmp/in/foo.txt"),
+//!    String::from("/tmp/in/foo2.txt"),
+//! ];
+//! let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create Engine");
+//! engine.run().expect("something failed");
 //! ```
 
 // `error_chain!` can recurse deeply
