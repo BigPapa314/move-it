@@ -17,40 +17,13 @@
 extern crate error_chain;
 
 pub mod action;
+pub mod configuration;
 pub mod destination;
 pub mod engine;
 pub mod errors;
-pub mod helper;
 pub mod source;
 
-use destination::*;
 pub use engine::Engine;
-// use errors::*;
-use action::*;
-use source::*;
-
-/// Placeholder for the move-it entry function
-///
-/// # Arguments
-///
-/// * `none` - Will be added soon.
-///
-/// *Note*: This is a placeholder function that will be replaced as some logic is added.
-pub fn engine_from_args<'a>(args: &'a mut dyn Iterator<Item = impl AsRef<str>>) -> Engine<'a> {
-    //let argv = args.collect::<Vec<String>>();
-
-    let src = args.map(|arg| SourceDescription::new("", arg.as_ref()));
-
-    // let src = vec![
-    //     SourceDescription::new("", &argv[1]),
-    //     SourceDescription::new("", &argv[2]),
-    // ];
-    Engine::new(
-        Box::new(src.into_iter()),
-        Box::new(SimpleDestinationBuilder::new("/tmp/out")),
-        Box::new(Echo()),
-    )
-}
 
 #[cfg(test)]
 mod tests {
@@ -58,9 +31,11 @@ mod tests {
 
     #[test]
     fn basics() {
-        let src = vec!["/tmp/in/foo.txt", "/tmp/in/foo2.txt"];
-        let mut src_iter = src.iter();
-        let engine = engine_from_args(&mut src_iter);
+        let src: Vec<String> = vec![
+            String::from("/tmp/in/foo.txt"),
+            String::from("/tmp/in/foo2.txt"),
+        ];
+        let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create Engine");
         engine.run().expect("something failed");
     }
 }
