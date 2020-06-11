@@ -8,13 +8,13 @@ It moves files from one folder to an other.
 Example
 
 ```rust
-pub use move_it::Engine;
-let src: Vec<String> = vec![
-   String::from("/tmp/in/foo.txt"),
-   String::from("/tmp/in/foo2.txt"),
-];
-let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create Engine");
-engine.run().expect("something failed");
+//pub use move_it::Engine;
+//let src: Vec<String> = vec![
+//   String::from("/tmp/in/foo.txt"),
+//   String::from("/tmp/in/foo2.txt"),
+//];
+//let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create Engine");
+//engine.run().expect("something failed");
 ```
 
 ## License

@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use options::*;
 
 impl<'a> Engine<'a> {
-    pub fn from_args(args: Box<dyn Iterator<Item = OsString> + 'a>) -> Result<Engine<'a>> {
+    pub fn from_args(args: Box<dyn Iterator<Item = String> + 'a>) -> Result<Engine<'a>> {
         let opt = Options::from_iter(args);
 
         // source: Box<dyn Iterator<Item = SourceDescription> + 'a>,
@@ -46,7 +46,7 @@ mod tests {
 
     #[test]
     fn help_text() {
-        let src: Vec<OsString> = vec![OsString::from("mi"), OsString::from("--help")];
+        let src: Vec<String> = vec![String::from("mi"), String::from("--help")];
 
         let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create engine");
         engine.run().expect("engine run failed");
