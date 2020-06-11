@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use structopt::StructOpt;
+pub use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "mi", about = "mv on steroids.")]
@@ -10,11 +10,11 @@ pub struct Options {
     ///
     /// -t <target dir> <source dir/file>...
     #[structopt(global = true, parse(from_os_str))]
-    paths: Vec<PathBuf>,
+    pub paths: Vec<PathBuf>,
 
     /// Target directory
     #[structopt(short = "t", long = "target", parse(from_os_str))]
-    target: Option<PathBuf>,
+    pub target: Option<PathBuf>,
 }
 
 #[cfg(test)]
