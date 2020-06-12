@@ -2,12 +2,12 @@ use super::SourceDescription;
 use super::SourceIterator;
 
 pub struct Each<'a> {
-    sources: Box<dyn Iterator<Item = Box<SourceIterator>> + 'a>,
-    current: Option<Box<SourceIterator>>,
+    sources: Box<dyn Iterator<Item = Box<SourceIterator<'a>>> + 'a>,
+    current: Option<Box<SourceIterator<'a>>>,
 }
 
 impl<'a> Each<'a> {
-    pub fn new(sources: Box<dyn Iterator<Item = Box<SourceIterator>>>) -> Self {
+    pub fn new(sources: Box<dyn Iterator<Item = Box<SourceIterator<'a>>>>) -> Self {
         Self {
             sources,
             current: None,
@@ -28,6 +28,9 @@ impl<'a> Iterator for Each<'a> {
 
         while result.is_none() {
             self.current = self.sources.next();
+            if self.current.is_none() {
+                break; // no more sources
+            }
             result = self.next_item();
         }
 

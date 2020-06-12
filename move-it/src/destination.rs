@@ -11,10 +11,8 @@ pub struct SimpleDestinationBuilder {
 }
 
 impl SimpleDestinationBuilder {
-    pub fn new(destination: &str) -> Self {
-        Self {
-            destination: PathBuf::from(destination),
-        }
+    pub fn new(destination: PathBuf) -> Self {
+        Self { destination }
     }
 }
 

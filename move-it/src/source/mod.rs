@@ -4,7 +4,7 @@ pub mod each;
 use std::path::Path;
 use std::path::PathBuf;
 
-pub type SourceIterator = dyn Iterator<Item = SourceDescription>;
+pub type SourceIterator<'a> = dyn Iterator<Item = SourceDescription> + 'a;
 
 #[derive(Debug)]
 pub struct SourceDescription {

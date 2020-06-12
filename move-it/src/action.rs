@@ -1,42 +1,45 @@
-use super::destination::*;
 use super::errors::*;
-use super::source::*;
-use std::fs::copy;
+use std::fs::{copy, rename};
+use std::path::PathBuf;
 
 pub trait Action {
-    fn execute(&mut self, src: &SourceDescription, dst: &mut dyn DestinationBuilder) -> Result<()>;
+    fn execute(&mut self, src: &PathBuf, dst: &PathBuf) -> Result<()>;
 }
+
+pub type ActionImpl<'a> = dyn Action + 'a;
 
 pub struct Echo();
 
 impl Action for Echo {
-    fn execute(&mut self, src: &SourceDescription, dst: &mut dyn DestinationBuilder) -> Result<()> {
-        let src_path = src.source_path();
-        let dst_path = dst.build(&src);
-        println!("echo: {:?} -> {:?}", src_path, dst_path);
+    fn execute(&mut self, src: &PathBuf, dst: &PathBuf) -> Result<()> {
+        println!("echo: {:?} -> {:?}", src, dst);
         Ok(())
     }
-    // = dyn Fn(&SourceDescription, &mut dyn DestinationBuilder) -> Result<()>;
 }
 
 pub struct Copy();
 
 impl Action for Copy {
-    fn execute(&mut self, src: &SourceDescription, dst: &mut dyn DestinationBuilder) -> Result<()> {
-        let src_path = src.source_path();
-        let dst_path = dst.build(&src);
-        println!("copy: {:?} -> {:?}", src_path, dst_path);
-        copy(&src_path, &dst_path).chain_err(|| "unable to copy file")?;
+    fn execute(&mut self, src: &PathBuf, dst: &PathBuf) -> Result<()> {
+        println!("copy: {:?} -> {:?}", src, dst);
+        copy(&src, &dst).chain_err(|| "unable to copy file")?;
         Ok(())
     }
-    // = dyn Fn(&SourceDescription, &mut dyn DestinationBuilder) -> Result<()>;
+}
+pub struct Move();
+
+impl Action for Move {
+    fn execute(&mut self, src: &PathBuf, dst: &PathBuf) -> Result<()> {
+        println!("move: {:?} -> {:?}", src, dst);
+        rename(&src, &dst).chain_err(|| "unable to rename file")?;
+        Ok(())
+    }
 }
 
-pub struct Custom(dyn Fn(&SourceDescription, &mut dyn DestinationBuilder) -> Result<()>);
+pub struct Custom(dyn Fn(&PathBuf, &PathBuf) -> Result<()>);
 
 impl Action for Custom {
-    fn execute(&mut self, src: &SourceDescription, dst: &mut dyn DestinationBuilder) -> Result<()> {
+    fn execute(&mut self, src: &PathBuf, dst: &PathBuf) -> Result<()> {
         (self.0)(src, dst)
     }
-    // = dyn Fn(&SourceDescription, &mut dyn DestinationBuilder) -> Result<()>;
 }
