@@ -51,17 +51,3 @@ impl From<ReadDir> for ReadDirRecursive {
         Self { dir, next: None }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn help_text() {
-        let dir = fs::read_dir("/home/thomas/Downloads").expect("could not read directory");
-
-        for path in ReadDirRecursive::from(dir) {
-            println!("{:?}", path);
-        }
-    }
-}

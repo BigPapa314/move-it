@@ -1,5 +1,5 @@
 use super::errors::*;
-use std::fs::{copy, rename};
+use std::fs::{copy, create_dir_all, rename};
 use std::path::PathBuf;
 
 pub trait Action {
@@ -17,22 +17,56 @@ impl Action for Echo {
     }
 }
 
-pub struct Copy();
+pub struct Copy {
+    verbose: bool,
+    create_missing_dirs: bool,
+}
+
+impl Copy {
+    pub fn new(verbose: bool, create_missing_dirs: bool) -> Self {
+        Self {
+            verbose,
+            create_missing_dirs,
+        }
+    }
+}
 
 impl Action for Copy {
     fn execute(&mut self, src: &PathBuf, dst: &PathBuf) -> Result<()> {
-        println!("copy: {:?} -> {:?}", src, dst);
-        copy(&src, &dst).chain_err(|| "unable to copy file")?;
-        Ok(())
+        if self.verbose {
+            println!("copy: {:?} -> {:?}", src, dst);
+        }
+        if self.create_missing_dirs {
+            create_dir_all(dst.parent().unwrap()).chain_err(|| "unable to create directory")?;
+        }
+        copy(&src, &dst)
+            .chain_err(|| "unable to copy file")
+            .and(Ok(()))
     }
 }
-pub struct Move();
+pub struct Move {
+    verbose: bool,
+    create_missing_dirs: bool,
+}
+
+impl Move {
+    pub fn new(verbose: bool, create_missing_dirs: bool) -> Self {
+        Self {
+            verbose,
+            create_missing_dirs,
+        }
+    }
+}
 
 impl Action for Move {
     fn execute(&mut self, src: &PathBuf, dst: &PathBuf) -> Result<()> {
-        println!("move: {:?} -> {:?}", src, dst);
-        rename(&src, &dst).chain_err(|| "unable to rename file")?;
-        Ok(())
+        if self.verbose {
+            println!("move: {:?} -> {:?}", src, dst);
+        }
+        if self.create_missing_dirs {
+            create_dir_all(dst.parent().unwrap()).chain_err(|| "unable to create directory")?;
+        }
+        rename(&src, &dst).chain_err(|| "unable to rename file")
     }
 }
 

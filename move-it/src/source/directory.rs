@@ -32,17 +32,3 @@ impl Iterator for Directory {
         Some(SourceDescription::new(self.base.clone(), next))
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn help_text() {
-        let dir = Directory::new(PathBuf::from("/home/thomas/Downloads"))
-            .expect("could not load directory");
-        for entry in dir {
-            println!("{:?}", entry);
-        }
-    }
-}

@@ -21,11 +21,3 @@ impl SourceDescription {
         Path::join(&self.base, &self.offset)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    // use super::*;
-
-    #[test]
-    fn help_text() {}
-}

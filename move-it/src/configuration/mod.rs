@@ -28,7 +28,7 @@ impl<'a> Engine<'a> {
 
         let source = Box::new(each::Each::new(Box::new(
             paths
-                .map(|path| -> Box<SourceIterator> {
+                .map(move |path| -> Box<SourceIterator> {
                     if path.is_dir() {
                         match directory::Directory::new(path) {
                             Ok(dir) => Box::new(dir),
@@ -46,15 +46,25 @@ impl<'a> Engine<'a> {
                 .into_iter(),
         )));
 
+        let verbose = opt.verbose > 0;
+        let create_target_dir = opt.create_target_dir.unwrap_or(false);
+        let disable_dir_creation = opt.disable_dir_creation.unwrap_or(false);
+
         let action: Box<ActionImpl<'a>> = match opt.command {
             Some(Command::Echo) => Box::new(Echo()),
-            Some(Command::Copy) => Box::new(Copy()),
-            Some(Command::Move) | None => Box::new(Move()),
+            Some(Command::Copy) => Box::new(Copy::new(verbose, !disable_dir_creation)),
+            Some(Command::Move) | None => Box::new(Move::new(verbose, !disable_dir_creation)),
+        };
+
+        let create_target_dir = if create_target_dir {
+            Some(target.clone())
+        } else {
+            None
         };
 
         let destination = Box::new(SimpleDestinationBuilder::new(target));
 
-        Ok(Engine::new(source, destination, action))
+        Ok(Engine::new(source, destination, action, create_target_dir))
     }
 }
 
@@ -80,18 +90,6 @@ mod tests {
     #[test]
     fn long_help_text() {
         let src: Vec<String> = vec![String::from("mi"), String::from("--help")];
-
-        let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create engine");
-        engine.run().expect("engine run failed");
-    }
-
-    #[test]
-    fn simple_move() {
-        let src: Vec<String> = vec![
-            String::from("mi"),
-            String::from("/home/thomas/Downloads"),
-            String::from("/home/thomas/new"),
-        ];
 
         let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create engine");
         engine.run().expect("engine run failed");

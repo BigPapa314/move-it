@@ -13,7 +13,7 @@ pub enum Command {
 }
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "mi", about = "mv on steroids.")]
+#[structopt(name = "mi", about = "Moves files. Will leave empty directories.")]
 pub struct Options {
     /// The source paths. If --target is not specified the last path is used as target.
     #[structopt(global = true, parse(from_os_str))]
@@ -22,6 +22,18 @@ pub struct Options {
     /// Target directory
     #[structopt(short = "t", long = "target", parse(from_os_str))]
     pub target: Option<PathBuf>,
+
+    /// Verbose mode (-v, -vv, -vvv, etc.)
+    #[structopt(short, long, parse(from_occurrences))]
+    pub verbose: u8,
+
+    /// Disable cration of missing directories
+    #[structopt(long)]
+    pub disable_dir_creation: Option<bool>,
+
+    /// Create the given target directory.
+    #[structopt(short, long)]
+    pub create_target_dir: Option<bool>,
 
     /// The command to execute. Default value is move.
     #[structopt(subcommand)]
