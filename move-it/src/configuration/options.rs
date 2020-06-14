@@ -1,22 +1,21 @@
 use std::path::PathBuf;
+pub use structopt::clap::arg_enum;
 pub use structopt::*;
 
-#[derive(Debug, StructOpt)]
-#[structopt()]
-pub enum Command {
-    /// Echos the source and the target file names.
-    Echo,
-    /// Copies the source files to the target.
-    Copy,
-    /// Moves the source files to the target.
-    Move,
+arg_enum! {
+    #[derive(Debug)]
+    pub enum Command {
+        Echo,
+        Copy,
+        Move,
+    }
 }
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "mi", about = "Moves files. Will leave empty directories.")]
 pub struct Options {
     /// The command to execute. Default value is move.
-    #[structopt(subcommand)]
+    #[structopt(short, long)]
     pub command: Option<Command>,
 
     /// The source paths. If --target is not specified the last path is used as target.
@@ -36,16 +35,24 @@ pub struct Options {
     pub disable_dir_creation: Option<bool>,
 
     /// Create the given target directory.
-    #[structopt(short, long)]
+    #[structopt(long)]
     pub create_target_dir: Option<bool>,
+
+    /// Delimiter to devide multiple provided include values.
+    #[structopt(long, default_value = ";")]
+    pub include_delimiter: String,
 
     /// Regex match on full source path. If matched the file will be included.
     #[structopt(short, long)]
-    pub include: Option<Vec<String>>,
+    pub include: Option<String>,
+
+    /// Delimiter to devide multiple provided exclude values.
+    #[structopt(long, default_value = ";")]
+    pub exclude_delimiter: String,
 
     /// Regex match on full source path. If matched the file will be excluded.
     #[structopt(short, long)]
-    pub exclude: Option<Vec<String>>,
+    pub exclude: Option<String>,
 }
 
 #[cfg(test)]

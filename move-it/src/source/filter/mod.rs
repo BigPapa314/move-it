@@ -30,7 +30,9 @@ impl<'a> Iterator for SourceFilter<'a> {
         let mut result;
         loop {
             result = self.source.next()?;
-            if self.filter.matches(&result) {
+            let check = self.filter.matches(&result);
+            println!("{} -> {}", result.source_path().to_string_lossy(), check);
+            if check {
                 break;
             }
         }

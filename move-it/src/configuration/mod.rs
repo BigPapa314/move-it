@@ -5,6 +5,7 @@ use super::destination::*;
 pub use super::engine::Engine;
 use super::errors::*;
 use super::source::*;
+use shellexpand;
 use std::path::PathBuf;
 use std::process::exit;
 
@@ -13,10 +14,6 @@ use options::*;
 impl<'a> Engine<'a> {
     pub fn from_args(args: Box<dyn Iterator<Item = String> + 'a>) -> Result<Engine<'a>> {
         let opt = Options::from_iter(args);
-
-        // source: Box<dyn Iterator<Item = SourceDescription> + 'a>,
-        // destination: Box<dyn DestinationBuilder + 'a>,
-        // action: Box<dyn Action + 'a>,
 
         check_options(&opt);
 
@@ -29,6 +26,9 @@ impl<'a> Engine<'a> {
         let source = Box::new(each::Each::new(Box::new(
             paths
                 .map(move |path| -> Box<SourceIterator> {
+                    let path = PathBuf::from(String::from(
+                        shellexpand::full(&path.to_string_lossy()).expect("could not parse string"),
+                    ));
                     if path.is_dir() {
                         match directory::Directory::new(path) {
                             Ok(dir) => Box::new(dir),
@@ -62,9 +62,12 @@ impl<'a> Engine<'a> {
             None
         };
 
-        let include_filter = opt.include.map(|rgx| {
+        let include_filter = opt.include.as_deref().map(|rgx| {
             Box::new(filter::or::Or::new(Box::new(
-                rgx.into_iter()
+                rgx.split(&opt.include_delimiter)
+                    .map(String::from)
+                    .collect::<Vec<String>>()
+                    .into_iter()
                     .map(|rgx| {
                         let res: Box<filter::FilterType<'a>> = Box::new(filter::regex::Regex::new(
                             regex::Regex::new(&rgx).expect("could not parse regex"),
@@ -75,10 +78,13 @@ impl<'a> Engine<'a> {
             )))
         });
 
-        let exclude_filter = opt.exclude.map(|rgx| {
+        let exclude_filter = opt.exclude.as_deref().map(|rgx| {
             Box::new(filter::not::Not::new(Box::new(filter::or::Or::new(
                 Box::new(
-                    rgx.into_iter()
+                    rgx.split(&opt.exclude_delimiter)
+                        .map(String::from)
+                        .collect::<Vec<String>>()
+                        .into_iter()
                         .map(|rgx| {
                             let res: Box<filter::FilterType<'a>> =
                                 Box::new(filter::regex::Regex::new(
@@ -144,13 +150,12 @@ mod tests {
     fn copy() {
         let src: Vec<String> = vec![
             String::from("mi"),
+            String::from("-c"),
+            String::from("echo"),
             String::from("-i"),
-            String::from("dich"),
-            String::from("--"),
+            String::from("Wir"),
             String::from("~/new"),
             String::from("~/new_copy"),
-            String::from("--"),
-            String::from("echo"),
         ];
 
         let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create engine");

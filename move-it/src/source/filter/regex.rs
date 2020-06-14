@@ -14,7 +14,12 @@ impl Regex {
 
 impl Filter for Regex {
     fn matches(&mut self, src: &SourceDescription) -> bool {
-        self.regex.is_match(&src.source_path().to_string_lossy())
+        let rgx = self.regex.to_string();
+        let src_path = src.source_path();
+        let source = src_path.to_string_lossy();
+        let result = self.regex.is_match(&source);
+        println!("match {} => {} -> {}", rgx, source, result);
+        result
     }
 }
 
