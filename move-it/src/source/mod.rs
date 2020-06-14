@@ -1,5 +1,6 @@
 pub mod directory;
 pub mod each;
+pub mod filter;
 
 use std::path::Path;
 use std::path::PathBuf;

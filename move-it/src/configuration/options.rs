@@ -15,6 +15,10 @@ pub enum Command {
 #[derive(Debug, StructOpt)]
 #[structopt(name = "mi", about = "Moves files. Will leave empty directories.")]
 pub struct Options {
+    /// The command to execute. Default value is move.
+    #[structopt(subcommand)]
+    pub command: Option<Command>,
+
     /// The source paths. If --target is not specified the last path is used as target.
     #[structopt(global = true, parse(from_os_str))]
     pub paths: Vec<PathBuf>,
@@ -35,9 +39,13 @@ pub struct Options {
     #[structopt(short, long)]
     pub create_target_dir: Option<bool>,
 
-    /// The command to execute. Default value is move.
-    #[structopt(subcommand)]
-    pub command: Option<Command>,
+    /// Regex match on full source path. If matched the file will be included.
+    #[structopt(short, long)]
+    pub include: Option<Vec<String>>,
+
+    /// Regex match on full source path. If matched the file will be excluded.
+    #[structopt(short, long)]
+    pub exclude: Option<Vec<String>>,
 }
 
 #[cfg(test)]

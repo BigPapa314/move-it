@@ -62,6 +62,50 @@ impl<'a> Engine<'a> {
             None
         };
 
+        let include_filter = opt.include.map(|rgx| {
+            Box::new(filter::or::Or::new(Box::new(
+                rgx.into_iter()
+                    .map(|rgx| {
+                        let res: Box<filter::FilterType<'a>> = Box::new(filter::regex::Regex::new(
+                            regex::Regex::new(&rgx).expect("could not parse regex"),
+                        ));
+                        res
+                    })
+                    .into_iter(),
+            )))
+        });
+
+        let exclude_filter = opt.exclude.map(|rgx| {
+            Box::new(filter::not::Not::new(Box::new(filter::or::Or::new(
+                Box::new(
+                    rgx.into_iter()
+                        .map(|rgx| {
+                            let res: Box<filter::FilterType<'a>> =
+                                Box::new(filter::regex::Regex::new(
+                                    regex::Regex::new(&rgx).expect("could not parse regex"),
+                                ));
+                            res
+                        })
+                        .into_iter(),
+                ),
+            ))))
+        });
+
+        let filter: Box<filter::FilterType<'_>> =
+            if include_filter.is_some() && exclude_filter.is_some() {
+                let iters: Vec<Box<filter::FilterType<'_>>> =
+                    vec![include_filter.unwrap(), exclude_filter.unwrap()];
+                Box::new(filter::and::And::new(Box::new(iters.into_iter())))
+            } else if include_filter.is_some() {
+                include_filter.unwrap()
+            } else if exclude_filter.is_some() {
+                exclude_filter.unwrap()
+            } else {
+                Box::new(filter::always_true::AlwaysTrue())
+            };
+
+        let source = Box::new(filter::SourceFilter::new(source, filter));
+
         let destination = Box::new(SimpleDestinationBuilder::new(target));
 
         Ok(Engine::new(source, destination, action, create_target_dir))
@@ -70,6 +114,7 @@ impl<'a> Engine<'a> {
 
 fn check_options(opt: &Options) {
     if opt.paths.len() < 1 || (opt.target.is_none() && opt.paths.len() < 2) {
+        println!("opt.paths.len: {}", opt.paths.len());
         let _ = Options::clap().print_help();
         exit(-1);
     }
@@ -90,6 +135,23 @@ mod tests {
     #[test]
     fn long_help_text() {
         let src: Vec<String> = vec![String::from("mi"), String::from("--help")];
+
+        let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create engine");
+        engine.run().expect("engine run failed");
+    }
+
+    #[test]
+    fn copy() {
+        let src: Vec<String> = vec![
+            String::from("mi"),
+            String::from("-i"),
+            String::from("dich"),
+            String::from("--"),
+            String::from("~/new"),
+            String::from("~/new_copy"),
+            String::from("--"),
+            String::from("echo"),
+        ];
 
         let engine = Engine::from_args(Box::new(src.into_iter())).expect("could not create engine");
         engine.run().expect("engine run failed");
