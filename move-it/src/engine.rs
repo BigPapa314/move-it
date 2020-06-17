@@ -7,7 +7,7 @@ use std::path::PathBuf;
 
 pub struct Engine<'a> {
     source: Box<SourceIterator<'a>>,
-    destination: Box<dyn DestinationBuilder + 'a>,
+    destination: Box<DestinationBuilderImpl<'a>>,
     action: Box<ActionImpl<'a>>,
     create_target_dir: Option<PathBuf>,
 }
@@ -15,7 +15,7 @@ pub struct Engine<'a> {
 impl<'a> Engine<'a> {
     pub fn new(
         source: Box<dyn Iterator<Item = SourceDescription> + 'a>,
-        destination: Box<dyn DestinationBuilder + 'a>,
+        destination: Box<DestinationBuilderImpl<'a>>,
         action: Box<ActionImpl<'a>>,
         create_target_dir: Option<PathBuf>,
     ) -> Self {

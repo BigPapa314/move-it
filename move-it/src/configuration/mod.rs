@@ -1,7 +1,7 @@
 mod options;
 
 use super::action::*;
-use super::destination::*;
+use super::destination;
 pub use super::engine::Engine;
 use super::errors::*;
 use super::source::*;
@@ -18,22 +18,16 @@ impl<'a> Engine<'a> {
         let command = opt.command.unwrap_or(Command::Move);
 
         // check options
-        if opt.paths.len() < 1
-            || (Command::Echo != command && (opt.target.is_none() && opt.paths.len() < 2))
-        {
+        if opt.paths.len() < 1 || (opt.target.is_none() && opt.paths.len() < 2) {
             let _ = Options::clap().print_help();
             return Err(format!("opt.paths.len: {}", opt.paths.len()).into());
         }
 
         let mut paths = opt.paths.clone().into_iter();
 
-        let target = if Command::Echo == command {
-            PathBuf::new()
-        } else {
-            match &opt.target {
-                Some(target) => target.clone(),
-                None => paths.next_back().unwrap(),
-            }
+        let target = match &opt.target {
+            Some(target) => target.clone(),
+            None => paths.next_back().unwrap(),
         };
 
         let source = Box::new(each::Each::new(Box::new(
@@ -114,11 +108,22 @@ impl<'a> Engine<'a> {
             _ => Box::new(filter::AlwaysTrue()),
         };
 
-        let source = Box::new(filter::SourceFilter::new(source, filter));
+        let source_iterator = Box::new(filter::SourceFilter::new(source, filter));
 
-        let destination = Box::new(SimpleDestinationBuilder::new(target));
+        let destination_builder: Box<destination::DestinationBuilderImpl<'_>> =
+            match opt.destination {
+                Some(destination_pattern) => {
+                    Box::new(destination::Mapped::new(target, destination_pattern))
+                }
+                None => Box::new(destination::Simple::new(target)),
+            };
 
-        Ok(Engine::new(source, destination, action, create_target_dir))
+        Ok(Engine::new(
+            source_iterator,
+            destination_builder,
+            action,
+            create_target_dir,
+        ))
     }
 }
 

@@ -53,6 +53,10 @@ pub struct Options {
     /// Regex match on full source path. If matched the file will be excluded.
     #[structopt(short, long)]
     pub exclude: Option<String>,
+
+    /// String with named tags from info providers.
+    #[structopt(short, long)]
+    pub destination: Option<String>,
 }
 
 #[cfg(test)]
