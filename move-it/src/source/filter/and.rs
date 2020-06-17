@@ -3,18 +3,20 @@ use super::Filter;
 use super::FilterType;
 
 pub struct And<'a> {
-    filters: Box<dyn Iterator<Item = Box<FilterType<'a>>> + 'a>,
+    filters: Vec<Box<FilterType<'a>>>,
 }
 
 impl<'a> And<'a> {
-    pub fn new(filters: Box<dyn Iterator<Item = Box<FilterType<'a>>> + 'a>) -> Self {
+    pub fn new(filters: Vec<Box<FilterType<'a>>>) -> Self {
         Self { filters }
     }
 }
 
 impl<'a> Filter for And<'a> {
     fn matches(&mut self, src: &SourceDescription) -> bool {
-        self.filters.all(|ref mut filter| filter.matches(src))
+        self.filters
+            .iter_mut()
+            .all(|ref mut filter| filter.matches(src))
     }
 }
 

@@ -15,12 +15,28 @@ impl<'a> Engine<'a> {
     pub fn from_args(args: Box<dyn Iterator<Item = String> + 'a>) -> Result<Engine<'a>> {
         let opt = Options::from_iter(args);
 
-        check_options(&opt);
+        let command = match opt.command {
+            Some(command) => command,
+            _ => Command::Move,
+        };
+
+        // check options
+        if opt.paths.len() < 1
+            || (Command::Echo != command && (opt.target.is_none() && opt.paths.len() < 2))
+        {
+            let _ = Options::clap().print_help();
+            return Err(format!("opt.paths.len: {}", opt.paths.len()).into());
+        }
 
         let mut paths = opt.paths.clone().into_iter();
-        let target = match &opt.target {
-            Some(target) => target.clone(),
-            None => paths.next_back().unwrap(),
+
+        let target = if Command::Echo == command {
+            PathBuf::new()
+        } else {
+            match &opt.target {
+                Some(target) => target.clone(),
+                None => paths.next_back().unwrap(),
+            }
         };
 
         let source = Box::new(each::Each::new(Box::new(
@@ -50,10 +66,10 @@ impl<'a> Engine<'a> {
         let create_target_dir = opt.create_target_dir.unwrap_or(false);
         let disable_dir_creation = opt.disable_dir_creation.unwrap_or(false);
 
-        let action: Box<ActionImpl<'a>> = match opt.command {
-            Some(Command::Echo) => Box::new(Echo()),
-            Some(Command::Copy) => Box::new(Copy::new(verbose, !disable_dir_creation)),
-            Some(Command::Move) | None => Box::new(Move::new(verbose, !disable_dir_creation)),
+        let action: Box<ActionImpl<'a>> = match command {
+            Command::Echo => Box::new(Echo()),
+            Command::Copy => Box::new(Copy::new(verbose, !disable_dir_creation)),
+            Command::Move => Box::new(Move::new(verbose, !disable_dir_creation)),
         };
 
         let create_target_dir = if create_target_dir {
@@ -63,66 +79,49 @@ impl<'a> Engine<'a> {
         };
 
         let include_filter = opt.include.as_deref().map(|rgx| {
-            Box::new(filter::or::Or::new(Box::new(
+            Box::new(filter::Or::new(
                 rgx.split(&opt.include_delimiter)
                     .map(String::from)
                     .collect::<Vec<String>>()
                     .into_iter()
                     .map(|rgx| {
-                        let res: Box<filter::FilterType<'a>> = Box::new(filter::regex::Regex::new(
+                        let res: Box<filter::FilterType<'a>> = Box::new(filter::Regex::new(
                             regex::Regex::new(&rgx).expect("could not parse regex"),
                         ));
                         res
                     })
-                    .into_iter(),
-            )))
+                    .collect(),
+            ))
         });
 
         let exclude_filter = opt.exclude.as_deref().map(|rgx| {
-            Box::new(filter::not::Not::new(Box::new(filter::or::Or::new(
-                Box::new(
-                    rgx.split(&opt.exclude_delimiter)
-                        .map(String::from)
-                        .collect::<Vec<String>>()
-                        .into_iter()
-                        .map(|rgx| {
-                            let res: Box<filter::FilterType<'a>> =
-                                Box::new(filter::regex::Regex::new(
-                                    regex::Regex::new(&rgx).expect("could not parse regex"),
-                                ));
-                            res
-                        })
-                        .into_iter(),
-                ),
+            Box::new(filter::Not::new(Box::new(filter::Or::new(
+                rgx.split(&opt.exclude_delimiter)
+                    .map(String::from)
+                    .collect::<Vec<String>>()
+                    .into_iter()
+                    .map(|rgx| {
+                        let res: Box<filter::FilterType<'a>> = Box::new(filter::Regex::new(
+                            regex::Regex::new(&rgx).expect("could not parse regex"),
+                        ));
+                        res
+                    })
+                    .collect(),
             ))))
         });
 
-        let filter: Box<filter::FilterType<'_>> =
-            if include_filter.is_some() && exclude_filter.is_some() {
-                let iters: Vec<Box<filter::FilterType<'_>>> =
-                    vec![include_filter.unwrap(), exclude_filter.unwrap()];
-                Box::new(filter::and::And::new(Box::new(iters.into_iter())))
-            } else if include_filter.is_some() {
-                include_filter.unwrap()
-            } else if exclude_filter.is_some() {
-                exclude_filter.unwrap()
-            } else {
-                Box::new(filter::always_true::AlwaysTrue())
-            };
+        let filter: Box<filter::FilterType<'_>> = match (include_filter, exclude_filter) {
+            (Some(include), Some(exclude)) => Box::new(filter::And::new(vec![include, exclude])),
+            (_, Some(exclude)) => exclude,
+            (Some(include), _) => include,
+            _ => Box::new(filter::AlwaysTrue()),
+        };
 
         let source = Box::new(filter::SourceFilter::new(source, filter));
 
         let destination = Box::new(SimpleDestinationBuilder::new(target));
 
         Ok(Engine::new(source, destination, action, create_target_dir))
-    }
-}
-
-fn check_options(opt: &Options) {
-    if opt.paths.len() < 1 || (opt.target.is_none() && opt.paths.len() < 2) {
-        println!("opt.paths.len: {}", opt.paths.len());
-        let _ = Options::clap().print_help();
-        exit(-1);
     }
 }
 
@@ -153,7 +152,7 @@ mod tests {
             String::from("-c"),
             String::from("echo"),
             String::from("-i"),
-            String::from("Wir"),
+            String::from("/2."),
             String::from("~/new"),
             String::from("~/new_copy"),
         ];

@@ -1,11 +1,17 @@
-pub mod always_true;
-pub mod and;
-pub mod not;
-pub mod or;
-pub mod regex;
+mod always_true;
+mod and;
+mod not;
+mod or;
+mod regex;
 
 use super::SourceDescription;
 use super::SourceIterator;
+
+pub use self::regex::Regex;
+pub use always_true::AlwaysTrue;
+pub use and::And;
+pub use not::Not;
+pub use or::Or;
 
 pub type FilterType<'a> = dyn Filter + 'a;
 
@@ -31,7 +37,7 @@ impl<'a> Iterator for SourceFilter<'a> {
         loop {
             result = self.source.next()?;
             let check = self.filter.matches(&result);
-            println!("{} -> {}", result.source_path().to_string_lossy(), check);
+            //println!("{} -> {}", result.source_path().to_string_lossy(), check);
             if check {
                 break;
             }
