@@ -15,10 +15,7 @@ impl<'a> Engine<'a> {
     pub fn from_args(args: Box<dyn Iterator<Item = String> + 'a>) -> Result<Engine<'a>> {
         let opt = Options::from_iter(args);
 
-        let command = match opt.command {
-            Some(command) => command,
-            _ => Command::Move,
-        };
+        let command = opt.command.unwrap_or(Command::Move);
 
         // check options
         if opt.paths.len() < 1

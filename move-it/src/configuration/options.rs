@@ -3,7 +3,7 @@ pub use structopt::clap::arg_enum;
 pub use structopt::*;
 
 arg_enum! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone, Copy)]
     pub enum Command {
         Echo,
         Copy,
