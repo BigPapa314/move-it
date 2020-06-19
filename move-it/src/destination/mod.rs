@@ -10,5 +10,5 @@ use std::path::PathBuf;
 pub type DestinationBuilderImpl<'a> = dyn DestinationBuilder + 'a;
 
 pub trait DestinationBuilder {
-    fn build(&self, source: &SourceDescription) -> PathBuf;
+    fn build(&mut self, source: &SourceDescription) -> PathBuf;
 }

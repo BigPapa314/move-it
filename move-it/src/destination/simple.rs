@@ -14,7 +14,7 @@ impl Simple {
 }
 
 impl DestinationBuilder for Simple {
-    fn build(&self, source: &SourceDescription) -> PathBuf {
+    fn build(&mut self, source: &SourceDescription) -> PathBuf {
         Path::join(&self.destination, &source.offset)
     }
 }
