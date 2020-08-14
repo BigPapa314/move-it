@@ -1,19 +1,24 @@
 //! It moves files from one folder to an other.
 
-// `error_chain!` can recurse deeply
-#![recursion_limit = "1024"]
+use log::*;
+use std::io::Write;
 
-// Import the macro. Don't forget to add `error-chain` in your
-// `Cargo.toml`!
-#[macro_use]
-extern crate error_chain;
+mod mv;
+mod result;
 
-pub mod action;
-pub mod configuration;
-pub mod destination;
-pub mod engine;
-pub mod errors;
-pub mod source;
-mod tools;
+pub fn mv(from: String, to: String) {
+    let start = std::time::Instant::now();
+    env_logger::Builder::from_default_env()
+        .format(move |buf, rec| {
+            let t = start.elapsed().as_secs_f32();
+            writeln!(buf, "{:.03} [{}] - {}", t, rec.level(), rec.args())
+        })
+        .init();
 
-pub use engine::Engine;
+    let mut rt = tokio::runtime::Runtime::new().unwrap();
+
+    match rt.block_on(mv::mv(from, to)) {
+        Ok(_) => info!("Done"),
+        Err(e) => error!("An error ocurred: {}", e),
+    };
+}
