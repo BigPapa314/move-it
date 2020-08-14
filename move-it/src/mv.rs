@@ -5,18 +5,18 @@ use std::{io, path::PathBuf};
 use tokio::fs::{self, DirEntry}; // 0.2.4
 
 pub async fn mv_file(from: impl Into<PathBuf>, to: impl Into<PathBuf>) -> Result<()> {
-    // println!(
-    //     "{} -> {}",
-    //     from.into().to_str().unwrap(),
-    //     to.into().to_str().unwrap()
-    // );
-    tokio::fs::rename(from.into(), to.into()).await?;
+    println!(
+        "{} -> {}",
+        from.into().to_str().unwrap(),
+        to.into().to_str().unwrap()
+    );
+    // tokio::fs::rename(from.into(), to.into()).await?;
     Ok(())
 }
 
-pub async fn mv(from: String, to: String) -> Result<()> {
-    let _from = PathBuf::from(shellexpand::full(&from)?.to_string());
-    let _to = PathBuf::from(shellexpand::full(&to)?.to_string());
+pub async fn mv(from: impl Into<String>, to: impl Into<String>) -> Result<()> {
+    let _from = std::path::PathBuf::from(shellexpand::full(&from.into())?.as_ref());
+    let _to = std::path::PathBuf::from(shellexpand::full(&to.into())?.as_ref());
 
     let sources = visit(&_from);
 
@@ -29,6 +29,7 @@ pub async fn mv(from: String, to: String) -> Result<()> {
                     let destionation = _to.join(offest);
 
                     if entry.metadata().await.unwrap().is_dir() {
+                        println!("creating: {}", destionation.to_str().unwrap());
                         tokio::fs::create_dir_all(destionation).await.unwrap();
                     } else {
                         mv_file(source, destionation).await.unwrap();
@@ -50,10 +51,10 @@ fn visit(path: impl Into<PathBuf>) -> impl Stream<Item = io::Result<DirEntry>> +
         while let Some(child) = dir.next_entry().await? {
             if child.metadata().await?.is_dir() {
                 to_visit.push(child.path());
-                files.push(child)
-            } else {
-                files.push(child)
             }
+
+            println!("adding: {:?}", child);
+            files.push(child);
         }
 
         Ok(files)
