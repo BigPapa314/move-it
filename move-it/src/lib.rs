@@ -13,15 +13,21 @@ mod producer;
 mod result;
 
 async fn test(from: impl Into<String>, to: impl Into<String>) -> Result<()> {
-    let from = std::path::PathBuf::from(shellexpand::full(&from.into())?.as_ref());
-    let _to = std::path::PathBuf::from(shellexpand::full(&to.into())?.as_ref());
+    let from0 = from.into();
+    let from1 = shellexpand::full(&from0)?;
+    let from = from1.as_ref();
+
+    println!("{:?}", from);
+
+    let from = std::path::PathBuf::from(from);
+    let to = std::path::PathBuf::from(shellexpand::full(&to.into())?.as_ref());
 
     let source = producer::all_files_recursive(from);
 
     let source = filter::include(regex::Regex::new(r"/test2").unwrap(), source);
     let source = filter::exclude(regex::Regex::new(r"/test3").unwrap(), source);
 
-    action::echo(source).await;
+    action::echo(source, to).await;
 
     Ok(())
 }

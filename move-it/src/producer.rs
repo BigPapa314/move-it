@@ -4,11 +4,12 @@ use tokio::fs::{self, DirEntry}; // 0.2.4
 
 use crate::element::Element;
 
-pub fn all_files_recursive<'a>(
-    path: impl Into<PathBuf> + 'a,
-) -> impl futures::Stream<Item = Element> + Send + 'a {
-    let dir_entries = visit(path);
-    dir_entries.map(|entry| Element::Create(entry.unwrap().path()))
+pub fn all_files_recursive(
+    path: impl Into<PathBuf>,
+) -> impl futures::Stream<Item = Element> + Send {
+    let path = path.into();
+    let dir_entries = visit(path.clone());
+    dir_entries.map(move |entry| Element::create(path.clone(), entry.unwrap()))
 }
 
 fn visit(path: impl Into<PathBuf>) -> impl Stream<Item = io::Result<DirEntry>> + Send + 'static {

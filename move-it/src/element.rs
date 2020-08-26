@@ -1,16 +1,27 @@
 use std::path::PathBuf;
+use tokio::fs::DirEntry;
 
 pub struct Element {
-    pub from: PathBuf,
-    pub to: PathBuf,
+    source: PathBuf,
+    from: DirEntry,
 }
 
 impl Element {
-    pub fn Create(from: impl Into<PathBuf>) -> Self {
+    pub fn create(source: impl Into<PathBuf>, from: DirEntry) -> Self {
         Self {
-            from: from.into(),
-            to: PathBuf::default(),
+            source: source.into(),
+            from,
         }
+    }
+
+    pub fn get_from(&self) -> PathBuf {
+        self.from.path()
+    }
+
+    pub fn get_to(&self, target: impl Into<PathBuf>) -> PathBuf {
+        let from = self.get_from();
+        let from = from.strip_prefix(&self.source).unwrap();
+        target.into().join(from)
     }
 }
 

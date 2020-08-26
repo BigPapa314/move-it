@@ -7,8 +7,9 @@ pub fn include<'a>(
     re: Regex,
     elements: impl futures::Stream<Item = Element> + Send + 'a,
 ) -> impl futures::Stream<Item = Element> + Send + 'a {
-    elements
-        .filter(move |element| future::ready(re.is_match(element.from.as_path().to_str().unwrap())))
+    elements.filter(move |element| {
+        future::ready(re.is_match(element.get_from().as_path().to_str().unwrap()))
+    })
 }
 
 pub fn exclude<'a>(
@@ -16,6 +17,6 @@ pub fn exclude<'a>(
     elements: impl futures::Stream<Item = Element> + Send + 'a,
 ) -> impl futures::Stream<Item = Element> + Send + 'a {
     elements.filter(move |element| {
-        future::ready(!re.is_match(element.from.as_path().to_str().unwrap()))
+        future::ready(!re.is_match(element.get_from().as_path().to_str().unwrap()))
     })
 }
