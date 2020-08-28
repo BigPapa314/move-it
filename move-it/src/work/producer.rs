@@ -2,14 +2,18 @@ use futures::{stream, Stream, StreamExt}; // 0.3.1
 use std::{io, path::PathBuf};
 use tokio::fs::{self, DirEntry}; // 0.2.4
 
-use crate::element::Element;
+use super::element::Element;
+use super::Work;
 
-pub fn all_files_recursive(
-    path: impl Into<PathBuf>,
-) -> impl futures::Stream<Item = Element> + Send {
-    let path = path.into();
-    let dir_entries = visit(path.clone());
-    dir_entries.map(move |entry| Element::create(path.clone(), entry.unwrap()))
+impl<'a> Work<'a> {
+    pub fn all_files_recursive(&mut self, path: impl Into<PathBuf>) {
+        let path = path.into();
+        let dir_entries = visit(path.clone());
+        let new_elements =
+            dir_entries.map(move |entry| Element::create(path.clone(), entry.unwrap()));
+
+        self.add_work(|elements| elements.chain(new_elements).boxed());
+    }
 }
 
 fn visit(path: impl Into<PathBuf>) -> impl Stream<Item = io::Result<DirEntry>> + Send + 'static {

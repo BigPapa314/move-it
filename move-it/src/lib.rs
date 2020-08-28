@@ -1,18 +1,19 @@
 //! It moves files from one folder to an other.
 
+mod mv;
+mod result;
+mod work;
+
 use log::*;
 use std::io::Write;
 
 use crate::result::Result;
 
-mod action;
-mod element;
-mod filter;
-mod mv;
-mod producer;
-mod result;
+use work::*;
 
 async fn test(from: impl Into<String>, to: impl Into<String>) -> Result<()> {
+    use futures::StreamExt; // 0.3.1
+
     let from0 = from.into();
     let from1 = shellexpand::full(&from0)?;
     let from = from1.as_ref();
@@ -22,12 +23,22 @@ async fn test(from: impl Into<String>, to: impl Into<String>) -> Result<()> {
     let from = std::path::PathBuf::from(from);
     let to = std::path::PathBuf::from(shellexpand::full(&to.into())?.as_ref());
 
-    let source = producer::all_files_recursive(from);
+    let mut work = Work::new();
+    work.all_files_recursive(from);
 
-    let source = filter::include(regex::Regex::new(r"/test2").unwrap(), source);
-    let source = filter::exclude(regex::Regex::new(r"/test3").unwrap(), source);
+    work.include(regex::Regex::new(r"/test2").unwrap());
+    work.exclude(regex::Regex::new(r"/test3").unwrap());
 
-    action::echo(source, to).await;
+    work.echo(to);
+
+    work.execute().await;
+
+    // let source = producer::all_files_recursive(from);
+
+    // let source = filter::include(regex::Regex::new(r"/test2").unwrap(), source);
+    // let source = filter::exclude(regex::Regex::new(r"/test3").unwrap(), source);
+
+    // action::echo(source, to).await;
 
     Ok(())
 }
