@@ -1,6 +1,8 @@
 //! It moves files from one folder to an other.
 
-mod mv;
+#[macro_use]
+extern crate lazy_static;
+
 mod result;
 mod work;
 
@@ -12,8 +14,6 @@ use crate::result::Result;
 use work::*;
 
 async fn test(from: impl Into<String>, to: impl Into<String>) -> Result<()> {
-    use futures::StreamExt; // 0.3.1
-
     let from0 = from.into();
     let from1 = shellexpand::full(&from0)?;
     let from = from1.as_ref();
@@ -21,15 +21,15 @@ async fn test(from: impl Into<String>, to: impl Into<String>) -> Result<()> {
     println!("{:?}", from);
 
     let from = std::path::PathBuf::from(from);
-    let to = std::path::PathBuf::from(shellexpand::full(&to.into())?.as_ref());
+    //let to = std::path::PathBuf::from(shellexpand::full(&to.into())?.as_ref());
 
     let mut work = Work::new();
     work.all_files_recursive(from);
 
-    work.include(regex::Regex::new(r"/test2").unwrap());
-    work.exclude(regex::Regex::new(r"/test3").unwrap());
+    //work.include(regex::Regex::new(r"/test2").unwrap());
+    //work.exclude(regex::Regex::new(r"/test3").unwrap());
 
-    work.echo(to);
+    work.echo(to.into());
 
     work.execute().await;
 

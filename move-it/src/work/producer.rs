@@ -24,10 +24,9 @@ fn visit(path: impl Into<PathBuf>) -> impl Stream<Item = io::Result<DirEntry>> +
         while let Some(child) = dir.next_entry().await? {
             if child.metadata().await?.is_dir() {
                 to_visit.push(child.path());
+            } else {
+                files.push(child);
             }
-
-            // println!("adding: {:?}", child);
-            files.push(child);
         }
 
         Ok(files)

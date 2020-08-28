@@ -415,6 +415,7 @@ dependencies = [
  "assert2",
  "env_logger",
  "futures",
+ "lazy_static",
  "log",
  "regex",
  "shellexpand",

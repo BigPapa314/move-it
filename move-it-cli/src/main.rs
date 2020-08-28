@@ -3,5 +3,8 @@
 use move_it::mv;
 
 fn main() {
-    mv("~/tmp/test".to_string(), "~/tmp/test2".to_string());
+    mv(
+        "~/tmp/test".to_string(),
+        r"~/tmp/test2/{FILE:RELPATH}/{FILE:NAME}".to_string(),
+    );
 }
