@@ -36,10 +36,18 @@ impl<'a> Work<'a> {
                     let target = target.clone();
                     async move {
                         let from = element.get_file().path();
-                        let to = element.expand(target).await.unwrap();
+                        let to = std::path::PathBuf::from(element.expand(target).await.ok()?);
 
-                        info!("COPY: {:?} -> {:?}", from, to);
-                        let _ = fs::copy(from, to).await.ok()?;
+                        info!("COPY: {:?} -> {:?}", &from, &to);
+                        if let Some(parent) = to.parent() {
+                            if let Err(e) = fs::create_dir_all(parent).await {
+                                error!("COPY: Could not create dir {:?}: {:?}", parent, e);
+                            };
+                        }
+
+                        if let Err(e) = fs::copy(&from, &to).await {
+                            error!("COPY: Could not move from {:?} to {:?}: {:?}", from, to, e);
+                        };
 
                         Some(element)
                     }
@@ -57,10 +65,19 @@ impl<'a> Work<'a> {
                     let target = target.clone();
                     async move {
                         let from = element.get_file().path();
-                        let to = element.expand(target).await.unwrap();
+                        let to = std::path::PathBuf::from(element.expand(target).await.ok()?);
 
                         info!("MOVE: {:?} -> {:?}", from, to);
-                        let _ = fs::rename(from, to).await.ok()?;
+
+                        if let Some(parent) = to.parent() {
+                            if let Err(e) = fs::create_dir_all(parent).await {
+                                error!("MOVE: Could not create dir {:?}: {:?}", parent, e);
+                            };
+                        }
+
+                        if let Err(e) = fs::rename(&from, &to).await {
+                            error!("MOVE: Could not move from {:?} to {:?}: {:?}", from, to, e);
+                        };
 
                         Some(element)
                     }
