@@ -9,7 +9,7 @@ use std::io::Write;
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 #[derive(Clap)]
-#[clap(version=crate_version!(), author = "Thomas Kilian <Big_Papa@gmx.net>")]
+#[clap(version=crate_version!(), author = "Thomas Kilian <Thomas-Kilian@gmx.net>")]
 struct Opts {
     /// If specified the files are copied and not moved
     #[clap(short, long)]
