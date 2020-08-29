@@ -6,6 +6,8 @@ mod producer;
 use element::Element;
 use futures::StreamExt; // 0.3.1
 
+use crate::result::Result;
+
 type Elements<'a> = futures::stream::BoxStream<'a, Element>;
 
 pub struct Work<'a> {
@@ -19,20 +21,22 @@ impl<'a> Work<'a> {
         }
     }
 
-    pub async fn execute(self) {
+    pub async fn execute(self) -> Result<()> {
         self.elements
             .for_each(|x| async move {
                 drop(x);
             })
             .await;
+
+        Ok(())
     }
 
-    pub fn add_work<Adder>(&mut self, adder: Adder)
+    pub(crate) fn add_work<Adder>(self, adder: Adder) -> Result<Work<'a>>
     where
         Adder: FnOnce(Elements<'a>) -> Elements<'a>,
     {
-        let mut elements = futures::stream::empty().boxed();
-        std::mem::swap(&mut self.elements, &mut elements);
-        self.elements = adder(elements);
+        Ok(Self {
+            elements: adder(self.elements),
+        })
     }
 }

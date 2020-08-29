@@ -114,6 +114,7 @@ impl Element {
                 let path = path.parent().unwrap();
 
                 let mut result = path.strip_prefix(&self.base)?.to_string_lossy().to_string();
+
                 if result.ends_with('/') || result.ends_with('\\') {
                     result.pop();
                 }
@@ -124,5 +125,3 @@ impl Element {
         }
     }
 }
-
-//pub type ElementStream = impl futures::Stream<Item = Element> + Send + 'static;

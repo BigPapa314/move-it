@@ -4,15 +4,18 @@ use tokio::fs::{self, DirEntry}; // 0.2.4
 
 use super::element::Element;
 use super::Work;
+use crate::result::*;
 
 impl<'a> Work<'a> {
-    pub fn all_files_recursive(&mut self, path: impl Into<PathBuf>) {
+    pub fn all_files_recursive(self, path: impl Into<String>) -> Result<Work<'a>> {
         let path = path.into();
+        let path = std::path::PathBuf::from(shellexpand::full(&path)?.as_ref());
+
         let dir_entries = visit(path.clone());
         let new_elements =
             dir_entries.map(move |entry| Element::create(path.clone(), entry.unwrap()));
 
-        self.add_work(|elements| elements.chain(new_elements).boxed());
+        self.add_work(move |elements| elements.chain(new_elements).boxed())
     }
 }
 
