@@ -470,7 +470,7 @@ dependencies = [
 
 [[package]]
 name = "move-it"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "assert2",
  "futures",
@@ -483,7 +483,7 @@ dependencies = [
 
 [[package]]
 name = "move-it-cli"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "clap",
  "env_logger",
