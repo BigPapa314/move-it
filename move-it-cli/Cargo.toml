@@ -1,6 +1,6 @@
 [package]
 name = "move-it-cli"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Thomas Kilian <Thomas-Kilian@gmx.net>"]
 edition = "2018"
 description = "An command line executable that moves files."
@@ -11,7 +11,7 @@ categories = ["command-line-utilities", "filesystem"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-move-it = { path ="../move-it", version = "0.2.1" }
+move-it = { path ="../move-it", version = "0.2.2" }
 tokio = {version = "0.2.*", features = ["full"] }
 log = "0.4.11"
 env_logger = "0.7.1"
