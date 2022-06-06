@@ -2,13 +2,11 @@
 
 use move_it::Work;
 
-use clap::{crate_description, crate_version, Clap, IntoApp};
-use clap_generate::{
-    generate, generators::Bash, generators::Elvish, generators::Fish, generators::PowerShell,
-    generators::Zsh,
-};
+use clap::{Command, CommandFactory, Parser};
+use clap_complete::{generate, Generator, Shell};
 use log::*;
 use snafu::Snafu;
+use std::io;
 use std::io::Write;
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
@@ -19,8 +17,8 @@ enum Error {
     ClParameterMissing { name: String },
 }
 
-#[derive(Clap)]
-#[clap(version=crate_version!(), author = "Thomas Kilian <Thomas-Kilian@gmx.net>", about(crate_description!()))]
+#[derive(Parser, Debug, PartialEq)]
+#[clap(author = "Thomas Kilian <Thomas-Kilian@gmx.net>")]
 struct Opts {
     /// If specified the files are copied and not moved
     #[clap(short, long)]
@@ -51,25 +49,21 @@ struct Opts {
     name_builder: String,
 
     /// Generates completion scripts
-    #[clap(short, long, possible_values(&["bash", "elvish", "fish", "powershell", "zsh"]))]
-    generate_completion: Option<String>,
+    #[clap(short, long, arg_enum)]
+    generate_completion: Option<Shell>,
+}
+
+fn print_completions<G: Generator>(gen: G, cmd: &mut Command) {
+    generate(gen, cmd, cmd.get_name().to_string(), &mut io::stdout());
 }
 
 async fn run() -> Result<()> {
     let opts: Opts = Opts::parse();
 
     if let Some(generator) = opts.generate_completion {
-        match generator.as_str() {
-            "bash" => generate::<Bash, _>(&mut Opts::into_app(), "mi", &mut std::io::stdout()),
-            "elvish" => generate::<Elvish, _>(&mut Opts::into_app(), "mi", &mut std::io::stdout()),
-            "fish" => generate::<Fish, _>(&mut Opts::into_app(), "mi", &mut std::io::stdout()),
-            "powershell" => {
-                generate::<PowerShell, _>(&mut Opts::into_app(), "mi", &mut std::io::stdout())
-            }
-            "zsh" => generate::<Zsh, _>(&mut Opts::into_app(), "mi", &mut std::io::stdout()),
-            _ => (),
-        }
-
+        let mut cmd = Opts::command();
+        eprintln!("Generating completion file for {:?}...", generator);
+        print_completions(generator, &mut cmd);
         return Ok(());
     }
 
