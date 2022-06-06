@@ -1,6 +1,6 @@
 [package]
 name = "move-it"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Thomas Kilian <Thomas-Kilian@gmx.net>"]
 edition = "2018"
 description = "A library that moves files."

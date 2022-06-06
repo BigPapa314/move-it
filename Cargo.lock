@@ -436,7 +436,7 @@ dependencies = [
 
 [[package]]
 name = "move-it"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "assert2",
  "futures",
@@ -449,7 +449,7 @@ dependencies = [
 
 [[package]]
 name = "move-it-cli"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "clap",
  "clap_complete",
