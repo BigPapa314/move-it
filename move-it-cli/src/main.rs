@@ -68,10 +68,10 @@ async fn run() -> Result<()> {
     }
 
     if opts.source.is_none() {
-        ClParameterMissing { name: "source" }.fail()?
+        ClParameterMissingSnafu { name: "source" }.fail()?
     }
     if opts.destination.is_none() {
-        ClParameterMissing {
+        ClParameterMissingSnafu {
             name: "destination",
         }
         .fail()?
@@ -125,7 +125,7 @@ fn main() {
         })
         .init();
 
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
+    let rt = tokio::runtime::Runtime::new().unwrap();
 
     match rt.block_on(run()) {
         Ok(_) => info!("Done"),
