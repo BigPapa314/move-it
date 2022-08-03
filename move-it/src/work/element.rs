@@ -37,7 +37,7 @@ impl Element {
 
         // cannot move captures_iter result to future
         // so the results are copied to a vector
-        let caps = SIMPLE.captures_iter(&src).collect::<Vec<_>>();
+        let caps = SIMPLE.captures_iter(src).collect::<Vec<_>>();
         async {
             for cap in caps {
                 if let Ok(var) = self
@@ -52,7 +52,7 @@ impl Element {
 
         // cannot move captures_iter result to future
         // so the results are copied to a vector
-        let caps = COMPLEX.captures_iter(&src).collect::<Vec<_>>();
+        let caps = COMPLEX.captures_iter(src).collect::<Vec<_>>();
         async {
             for cap in caps {
                 if let Ok(var) = self
@@ -79,7 +79,7 @@ impl Element {
     }
 
     async fn get_raw_variable(&self, key: String) -> Result<String> {
-        Ok(key.to_string())
+        Ok(key)
     }
     async fn get_file_variable(&self, key: String) -> Result<String> {
         match key.as_str() {
@@ -87,23 +87,23 @@ impl Element {
                 .file
                 .file_name()
                 .to_str()
-                .ok_or(result::error("convert error!"))?
+                .ok_or_else(|| result::error("convert error!"))?
                 .to_string()),
             "STEM" => Ok(self
                 .file
                 .path()
                 .file_stem()
-                .ok_or(result::error("convert error!"))?
+                .ok_or_else(|| result::error("convert error!"))?
                 .to_str()
-                .ok_or(result::error("convert error!"))?
+                .ok_or_else(|| result::error("convert error!"))?
                 .to_string()),
             "EXT" => Ok(self
                 .file
                 .path()
                 .extension()
-                .ok_or(result::error("convert error!"))?
+                .ok_or_else(|| result::error("convert error!"))?
                 .to_str()
-                .ok_or(result::error("convert error!"))?
+                .ok_or_else(|| result::error("convert error!"))?
                 .to_string()),
             "SIZE" => {
                 let meta_data = self.file.metadata().await?;
